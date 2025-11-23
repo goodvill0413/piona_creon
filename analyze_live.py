@@ -169,21 +169,38 @@ def main():
     print("=" * 70, flush=True)
     print("    PIONA_CREON Live Analyzer", flush=True)
     print("=" * 70, flush=True)
-    
+
     codes = input("\nStock codes (ex: 005930,000660): ").strip()
     if not codes:
         print("No input -> Exit", flush=True)
         input("Press Enter...")
         return
-    
-    days_input = input("Days (default 500): ").strip()
-    days = int(days_input) if days_input.isdigit() else 500
-    
+
+    days_input = input("Days (default 500, max 1000): ").strip()
+    if days_input.isdigit():
+        days = max(1, min(int(days_input), 1000))  # 1-1000 범위로 제한
+    else:
+        days = 500
+
     code_list = [c.strip() for c in codes.split(",") if c.strip()]
-    
+
+    # 종목 코드 검증
+    valid_codes = []
     for code in code_list:
+        # 6자리 숫자 또는 U로 시작하는 지수 코드
+        if (code.isdigit() and len(code) == 6) or (code.startswith("U") and len(code) >= 4):
+            valid_codes.append(code)
+        else:
+            print(f"Warning: Invalid code format '{code}' - skipped", flush=True)
+
+    if not valid_codes:
+        print("No valid codes -> Exit", flush=True)
+        input("Press Enter...")
+        return
+
+    for code in valid_codes:
         run_analysis(code, days)
-    
+
     input("\nPress Enter to exit...")
 
 if __name__ == "__main__":

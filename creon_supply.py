@@ -26,7 +26,8 @@ class CreonSupply:
                     "inst_net_buy": self.inst.GetDataValue(2, i),
                 })
             return pd.DataFrame(rows)
-        except:
+        except Exception as e:
+            print(f"[CreonSupply] Error: {e}")
             return pd.DataFrame()
 
     # strength, bid_ask_ratio 제거판

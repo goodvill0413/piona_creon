@@ -110,12 +110,12 @@ class VolumeProfileSR:
         nearest_support = supports[0]["level"] if supports else 0
         nearest_resistance = resistances[0]["level"] if resistances else 0
 
-        if nearest_support > 0:
+        if nearest_support > 0 and current_price > 0:
             support_distance = (current_price - nearest_support) / current_price * 100
         else:
             support_distance = 100
 
-        if nearest_resistance > 0:
+        if nearest_resistance > 0 and current_price > 0:
             resistance_distance = (nearest_resistance - current_price) / current_price * 100
         else:
             resistance_distance = 100

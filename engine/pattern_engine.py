@@ -24,7 +24,7 @@ class ShinPatternEngine:
         if len(lows) < 2:
             return {"detected": False}
         last_two = lows[-2:]
-        if last_two[0][1] == 0:
+        if last_two[0][1] == 0 or last_two[1][1] == 0:
             return {"detected": False}
         depth_diff = abs(last_two[0][1] - last_two[1][1]) / last_two[0][1]
         neckline = max(high[last_two[0][0]:last_two[1][0]+1]) if last_two[1][0] > last_two[0][0] else high[last_two[0][0]]
@@ -39,7 +39,7 @@ class ShinPatternEngine:
         if len(highs) < 2:
             return {"detected": False}
         last_two = highs[-2:]
-        if last_two[0][1] == 0:
+        if last_two[0][1] == 0 or last_two[1][1] == 0:
             return {"detected": False}
         height_diff = abs(last_two[0][1] - last_two[1][1]) / last_two[0][1]
         neckline = min(low[last_two[0][0]:last_two[1][0]+1]) if last_two[1][0] > last_two[0][0] else low[last_two[0][0]]
@@ -54,10 +54,10 @@ class ShinPatternEngine:
             return {"detected": False}
         last_three = lows[-3:]
         prices = [l[1] for l in last_three]
-        if min(prices) == 0:
+        if min(prices) == 0 or any(p == 0 for p in prices):
             return {"detected": False}
         avg = sum(prices) / 3
-        if all(abs(p - avg) / avg < 0.03 for p in prices):
+        if avg > 0 and all(abs(p - avg) / avg < 0.03 for p in prices):
             neckline = max(high[last_three[0][0]:last_three[-1][0]+1])
             if close[-1] > neckline:
                 return {"detected": True, "pattern": "triple_bottom", "confidence": 90, "signal": "STRONG_BUY"}
@@ -70,10 +70,10 @@ class ShinPatternEngine:
             return {"detected": False}
         last_three = highs[-3:]
         prices = [h[1] for h in last_three]
-        if min(prices) == 0:
+        if min(prices) == 0 or any(p == 0 for p in prices):
             return {"detected": False}
         avg = sum(prices) / 3
-        if all(abs(p - avg) / avg < 0.03 for p in prices):
+        if avg > 0 and all(abs(p - avg) / avg < 0.03 for p in prices):
             neckline = min(low[last_three[0][0]:last_three[-1][0]+1])
             if close[-1] < neckline:
                 return {"detected": True, "pattern": "triple_top", "confidence": 90, "signal": "STRONG_SELL"}
@@ -86,7 +86,7 @@ class ShinPatternEngine:
             return {"detected": False}
         last_three = highs[-3:]
         left, head, right = last_three[0][1], last_three[1][1], last_three[2][1]
-        if head > left and head > right and abs(left - right) / left < 0.05:
+        if left > 0 and head > left and head > right and abs(left - right) / left < 0.05:
             neckline = min(low[last_three[0][0]:last_three[-1][0]+1])
             if close[-1] < neckline:
                 return {"detected": True, "pattern": "head_shoulders", "confidence": 92, "signal": "STRONG_SELL"}
@@ -99,7 +99,7 @@ class ShinPatternEngine:
             return {"detected": False}
         last_three = lows[-3:]
         left, head, right = last_three[0][1], last_three[1][1], last_three[2][1]
-        if head < left and head < right and abs(left - right) / left < 0.05:
+        if left > 0 and head < left and head < right and abs(left - right) / left < 0.05:
             neckline = max(high[last_three[0][0]:last_three[-1][0]+1])
             if close[-1] > neckline:
                 return {"detected": True, "pattern": "inverse_head_shoulders", "confidence": 92, "signal": "STRONG_BUY"}
@@ -250,8 +250,11 @@ class ShinPatternEngine:
         if len(volume) < 21:
             return {"detected": False}
         avg_vol = np.mean(volume[-21:-1])
-        if avg_vol > 0 and volume[-1] > avg_vol * 2:
-            price_change = (close[-1] - close[-2]) / close[-2] * 100
+        if avg_vol > 0 and volume[-1] is not None and volume[-1] > avg_vol * 2:
+            if close[-2] > 0:
+                price_change = (close[-1] - close[-2]) / close[-2] * 100
+            else:
+                price_change = 0
             signal = "VOLUME_BUY" if price_change > 0 else "VOLUME_SELL"
             return {"detected": True, "pattern": "volume_spike", "confidence": 70, "vol_ratio": round(volume[-1]/avg_vol, 2), "signal": signal}
         return {"detected": False}
