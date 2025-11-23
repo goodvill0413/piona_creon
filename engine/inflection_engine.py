@@ -166,7 +166,7 @@ class ShinInflectionEngine:
         - 52일 신고가/신저가 갱신 시 SS2 방향 결정
         """
         if len(high) < days_back + 52:
-            return {"slope": 0, "signal": "데이터부족"}  # None → 0으로 변경
+            return {"slope": None, "signal": "데이터부족"}
         
         h, l = np.array(high), np.array(low)
         
@@ -179,7 +179,10 @@ class ShinInflectionEngine:
         
         # 빗각 (기울기)
         slope = (ss2_now - ss2_77) / days_back
-        slope_pct = (slope / ss2_77) * 100 * days_back  # % 변화
+        if ss2_77 > 0:
+            slope_pct = (slope / ss2_77) * 100 * days_back  # % 변화
+        else:
+            slope_pct = 0
         
         # 52일 신고가/신저가 체크
         high_52 = h[-52:].max()

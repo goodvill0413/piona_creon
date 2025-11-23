@@ -66,6 +66,8 @@ class CreonFibonacci:
 
     def _check_fibo_levels(self, current: float, levels: Dict, tolerance: float = 0.015) -> List[str]:
         near_levels = []
+        if current == 0:
+            return near_levels
         for name, level in levels.items():
             if level > 0 and abs(current - level) / current < tolerance:
                 near_levels.append(f"{name}:{level}")

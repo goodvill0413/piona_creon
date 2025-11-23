@@ -87,8 +87,8 @@ class CreonSupply:
             cp = win32com.client.Dispatch("CpUtil.CpCybos")
             if cp.IsConnect == 1:
                 self.connected = True
-        except:
-            pass
+        except Exception as e:
+            print(f"[Supply] Connection error: {e}", flush=True)
 
     def get_investor(self, code, days=100):
         if not self.connected:
@@ -115,7 +115,8 @@ class CreonSupply:
             df = df.iloc[::-1].reset_index(drop=True)
             df["date"] = pd.to_datetime(df["date"], format="%Y%m%d")
             return df
-        except:
+        except Exception as e:
+            print(f"[Supply] Error getting investor data: {e}", flush=True)
             return pd.DataFrame()
 
 

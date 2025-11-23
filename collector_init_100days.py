@@ -31,7 +31,8 @@ for code in symbols:
                 print(f"건너뜀 → 이미 100일 있음")
                 success += 1
                 continue
-        except:
+        except Exception as e:
+            print(f"  [파일 읽기 오류: {e}]")
             pass
 
     df = merger.get_full_data(code, days=100)
